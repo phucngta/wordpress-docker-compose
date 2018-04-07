@@ -3,17 +3,17 @@ services:
   wordpress:
     image: wordpress:latest # https://hub.docker.com/_/wordpress/
     ports:
-      - 127.0.0.1:80:80 # change ip if required
+      - 127.0.0.1:8001:80 # change ip if required
     volumes:
       - ./config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
       - ./wp-app:/var/www/html # Full wordpress project
-      #- ./plugin-name/trunk/:/var/www/html/wp-content/plugins/plugin-name # Plugin development
-      #- ./theme-name/trunk/:/var/www/html/wp-content/themes/theme-name # Theme development
+      - ./plugins/:/var/www/html/wp-content/plugins/ # Plugin development
+      - ./themes/:/var/www/html/wp-content/themes/ # Theme development
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: root
-      WORDPRESS_DB_PASSWORD: password
+      WORDPRESS_DB_PASSWORD: root
     depends_on:
       - db
     networks:
@@ -26,9 +26,20 @@ services:
       - ./wp-data:/docker-entrypoint-initdb.d
     environment:
       MYSQL_DATABASE: wordpress
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - wordpress-network
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links: 
+        - db:db
+    ports:
+        - 8000:80
+    environment:
+        MYSQL_USER: user
+        MYSQL_PASSWORD: test
+        MYSQL_ROOT_PASSWORD: root 
     networks:
       - wordpress-network
 networks:
   wordpress-network:
-      driver: bridge
